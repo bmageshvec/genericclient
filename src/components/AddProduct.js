@@ -1,75 +1,89 @@
 import { useState } from 'react';
 import api from '../utils/api';
+import './styles.css';
 
-function AddProduct() {
-  const [name, setName] = useState('');
-  const [model, setModel] = useState('');
-  const [spec, setSpec] = useState('');
-  const [image, setImage] = useState(null);
-  const [error, setError] = useState('');
+const AddProduct = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    model: '',
+    spec: '',
+    image: null,
+  });
+  const [error, setError] = useState(null);
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError(null);
 
-    if (image && !['image/jpeg', 'image/png'].includes(image.type)) {
+    if (formData.image && !['image/jpeg', 'image/png'].includes(formData.image.type)) {
       setError('Only JPEG or PNG images are allowed');
       return;
     }
 
-    const formData = new FormData();
-    formData.append('product', JSON.stringify({ name, model, spec }));
-    if (image) formData.append('image', image);
+    const data = new FormData();
+    data.append('product', JSON.stringify({
+      name: formData.name,
+      model: formData.model,
+      spec: formData.spec,
+    }));
+    if (formData.image) {
+      data.append('image', formData.image);
+    }
 
     try {
-      await api.post('/products', formData, {
+      await api.post('/products', data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setName('');
-      setModel('');
-      setSpec('');
-      setImage(null);
-      e.target.reset();
+      setFormData({ name: '', model: '', spec: '', image: null });
     } catch (err) {
-      setError('Failed to add product');
+      setError(err.message || 'Failed to add product');
     }
   };
 
-  const handleFileChange = (e) => {
-    setImage(e.target.files[0] || null);
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="add-product-form">
+    <form className="add-product-form" onSubmit={handleSubmit}>
       <input
         type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
+        name="name"
         placeholder="Product Name"
+        value={formData.name}
+        onChange={handleChange}
         required
       />
       <input
         type="text"
-        value={model}
-        onChange={(e) => setModel(e.target.value)}
+        name="model"
         placeholder="Model"
+        value={formData.model}
+        onChange={handleChange}
         required
       />
       <textarea
-        value={spec}
-        onChange={(e) => setSpec(e.target.value)}
+        name="spec"
         placeholder="Specifications"
+        value={formData.spec}
+        onChange={handleChange}
         required
       />
       <input
         type="file"
-        onChange={handleFileChange}
+        name="image"
         accept="image/jpeg,image/png"
+        onChange={handleChange}
+        data-testid="image-upload"
       />
-      {error && <p className="error">{error}</p>}
       <button type="submit">Add Product</button>
+      {error && <p className="error">{error}</p>}
     </form>
   );
-}
+};
 
 export default AddProduct;

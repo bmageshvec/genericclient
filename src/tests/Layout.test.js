@@ -36,4 +36,16 @@ describe('Layout Component', () => {
     expect(homeLink).not.toHaveClass('active');
     expect(addProductLink).toHaveClass('active');
   });
+
+  test('handles invalid route path', () => {
+    render(
+      <MemoryRouter initialEntries={['/invalid']}>
+        <Layout />
+      </MemoryRouter>
+    );
+    const homeLink = screen.getByText('Home');
+    const addProductLink = screen.getByText('Add Product');
+    expect(homeLink).not.toHaveClass('active');
+    expect(addProductLink).not.toHaveClass('active');
+  });
 });

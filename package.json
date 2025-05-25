@@ -39,10 +39,11 @@
   },
   "jest": {
     "moduleNameMapper": {
-      "^react-router-dom$": "<rootDir>/__mocks__/react-router-dom.js"
-    }
-  },
-  "devDependencies": {
-    "identity-obj-proxy": "^3.0.0"
+      "^react-router-dom$": "<rootDir>/__mocks__/react-router-dom.js",
+      "\\.css$": "identity-obj-proxy"
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!axios)/"
+    ]
   }
 }
